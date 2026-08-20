@@ -1,0 +1,47 @@
+name: Sync production source
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/sync-from-netlify.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download verified production build
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE="https://fssmsports.netlify.app"
+          files=(
+            index.html
+            app-1.css app-2.css app-3.css
+            app-1.js app-2.js app-3.js app-4.js
+            cloud.css supabase-sync.js service-worker.js
+            manifest.webmanifest netlify.toml README.txt .nojekyll
+            football-icon.png fssm-icon-64.png fssm-icon-180.png fssm-icon-192.png
+            fssm-icon-512.png fssm-icon-1024.png fssm-logo-horizontal.png fssm-splash.png
+          )
+          for file in "${files[@]}"; do
+            curl --fail --silent --show-error --location "$BASE/$file" --output "$file"
+          done
+      - name: Commit production source
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- index.html app-*.css app-*.js cloud.css supabase-sync.js service-worker.js manifest.webmanifest netlify.toml README.txt .nojekyll *.png
+          if git diff --cached --quiet; then
+            echo "Repository already matches production."
+            exit 0
+          fi
+          git commit -m "Sync verified FSSM production build"
+          git push
