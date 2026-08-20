@@ -32,7 +32,7 @@ jobs:
             fssm-icon-512.png fssm-icon-1024.png fssm-logo-horizontal.png fssm-splash.png
           )
 
-          rm -f app-0*.js README.md DEPLOY_TRIGGER.txt SYNC_NOW.txt
+          rm -f app-0*.js README.md DEPLOY_TRIGGER.txt SYNC_NOW.txt HYDRATE_NOW.txt
           for file in "${files[@]}"; do
             curl --fail --silent --show-error --location "$BASE/$file" --output "$file"
           done
