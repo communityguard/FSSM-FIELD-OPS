@@ -1,0 +1,54 @@
+name: Hydrate verified production source
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  hydrate:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Replace repository with verified production bundle
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE="https://fssmsports.netlify.app"
+          files=(
+            index.html
+            app-1.css app-2.css app-3.css
+            app-1.js app-2.js app-3.js app-4.js
+            cloud.css supabase-sync.js service-worker.js
+            manifest.webmanifest netlify.toml README.txt
+            football-icon.png fssm-icon-64.png fssm-icon-180.png fssm-icon-192.png
+            fssm-icon-512.png fssm-icon-1024.png fssm-logo-horizontal.png fssm-splash.png
+          )
+
+          rm -f app-0*.js README.md DEPLOY_TRIGGER.txt SYNC_NOW.txt
+          for file in "${files[@]}"; do
+            curl --fail --silent --show-error --location "$BASE/$file" --output "$file"
+          done
+          touch .nojekyll
+          rm -f .github/workflows/hydrate-production.yml
+
+      - name: Commit exact production source
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "Repository already matches production."
+            exit 0
+          fi
+          git commit -m "Sync exact verified FSSM production bundle"
+          git push
