@@ -1,0 +1,15 @@
+{
+  "name":"FSSM Field Ops",
+  "short_name":"Field Ops",
+  "description":"Football sideline command center for roster, live score, mandatory play tracking, stats, and reporting.",
+  "start_url":"./",
+  "scope":"./",
+  "display":"standalone",
+  "orientation":"any",
+  "background_color":"#07100D",
+  "theme_color":"#07100D",
+  "icons":[
+    {"src":"https://fssmsports.netlify.app/fssm-icon-192.png","sizes":"192x192","type":"image/png","purpose":"any maskable"},
+    {"src":"https://fssmsports.netlify.app/fssm-icon-512.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}
+  ]
+}
